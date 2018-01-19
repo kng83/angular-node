@@ -17,8 +17,13 @@ export class MessageInputComponent implements OnInit{
     onSubmit(form: NgForm) {
 
         if(this.message){
-            //edit - jezeli istnieje to ja edytujemy
+            //edit - jezeli istnieje to ja edytujemy tu jest pewien trick aby wyczysc pole input daje sie mu null
+            //Because we only assign a new value to this.message.
+            // Why should it affect the old value that was assigned to this property
+            //
             this.message.content = form.value.content;
+            this.messageService.updateMessage(this.message)
+                .subscribe(result =>console.log(result));
             this.message= null;
             //i tu musimy zrobic update naszego rekordu
 

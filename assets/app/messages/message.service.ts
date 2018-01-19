@@ -1,5 +1,4 @@
 import { Message } from "./message.model";
-
 import {Http,Response,Headers} from "@angular/http";
 import {EventEmitter, Injectable} from "@angular/core";
 import 'rxjs/Rx';
@@ -20,14 +19,18 @@ export class MessageService {
         //tutaj zwracamy observable poniewaz chcemy ja rozwiazac w komponencie
         //Przy pierwszym podejsciu nie udalo sie wyslac wiadomosci bo byly zle naglowki
         //plain/text anie json i trzeba dodac headers
+        //tutaj takze musimy pobrac nasze id
 
-        this.messages.push(message);
         const body = JSON.stringify(message);
         const headers = new Headers({'Content-Type':'application/json'});
         return this.http
            .post('http://localhost:3000/message',body,{headers: headers})
            .map((response:Response)=>{
-                return response.json();
+                const result = response.json();
+                //Tu zwracamy nowa message na backendzie mamy obj
+                const message = new Message(result.obj.content, 'Dummy' ,result.obj._id,null);
+                this.messages. push(message);
+                return message;
            })
            .catch((error:Response)=>{
                // tutaj daje sie observable bo rxjs nie nadaje automatycznie
@@ -39,17 +42,14 @@ export class MessageService {
 
     getMessages() {
         // Poniewaz odpowiedz zawiera np _v z bazy danych trzeba ja przerobic
+        // Tutaj rowniez jes pobierany _id z bazy danych
         return this.http.get('http://localhost:3000/message')
             .map((response: Response) =>{
                 const messages = response.json().obj;
                 let transformedMessages: Message[] =[];
                 for(let message of messages){
                     transformedMessages.push(
-                        new Message(
-                            message.content,
-                            'Dummy',
-                            message.id,
-                            null
+                        new Message(message.content, 'Dummy', message._id, null
                         ));
                 }
                 //tak zeby tu byl porzadek
@@ -65,11 +65,33 @@ export class MessageService {
         this.messageIsEdit.emit(message);
     }
 
-    updateMessage(){
+    updateMessage(message: Message){
+        const body = JSON.stringify(message);
+        const headers = new Headers({'Content-Type':'application/json'});
+        return this.http
+            .patch('http://localhost:3000/message/' + message.messageId, body,{headers: headers})
+            .map((response:Response)=>{
+                return response.json();
+            })
+            .catch((error:Response)=>{
+                // tutaj daje sie observable bo rxjs nie nadaje automatycznie
+                // errorowi statusu observable i dlatego go tworzymy
+                return Observable.throw(error.json());
+            })
 
     }
 
     deleteMessage(message: Message) {
         this.messages.splice(this.messages.indexOf(message), 1);
+        return this.http.delete('http://localhost:3000/message/' + message.messageId)
+            .map((response:Response)=>{
+                return response.json();
+            })
+            .catch((error:Response)=>{
+                // tutaj daje sie observable bo rxjs nie nadaje automatycznie
+                // errorowi statusu observable i dlatego go tworzymy
+                return Observable.throw(error.json());
+            })
+
     }
 }
