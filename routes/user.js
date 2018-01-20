@@ -57,7 +57,7 @@ router.post('/signin', function (req, res, next) {
            });
        }
        // teraz tworzemy tokena do autentykacji
-        // zawiera on dane gdzie damy user, secret- tutaj wpisuje sie jakias nazwe dla podwyzszenia bezpieczenstwa
+        // zawiera on dane gdzie dany user, secret- tutaj wpisuje sie jakias nazwe dla podwyzszenia bezpieczenstwa
         // i czas w sekundach do wygasniecia
         var token = jwt.sign({user: user}, 'secret', {expiresIn:7200});
         res.status(200).json({

@@ -10,8 +10,9 @@ var appRoutes = require('./routes/app');
 var messageRoutes = require('./routes/messages');
 var userRoutes = require('./routes/user');
 
+mongoose.Promise = global.Promise;
 var app = express();
-mongoose.connect('mongodb://localhost:27017/node-angular');
+mongoose.connect('mongodb://localhost:27017/node-angular', { useMongoClient: true });
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -19,6 +20,9 @@ app.set('view engine', 'hbs');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+
+// logger wyswietla nam wszystkie polaczenia w consoli
+
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));

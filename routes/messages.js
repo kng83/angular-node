@@ -6,6 +6,7 @@ var express = require('express');
 var router = express.Router();
 var Message = require('../models/message');
 var jwt = require('jsonwebtoken');
+var User = require('../models/user');
 
 /*Tutaj wstawiamy get route do pobierania dancych z bazy danych
 * poniewaz mamy zimportowany nasz obiekt z mongoose mozemy dac tylko Message.find()
@@ -52,26 +53,51 @@ router.use('/', function(req,res,next){
  * maja juz wstawione /message dlatego na dole nie musimy
  * tego dawac
  * req.body.content zapisuje wyslane z angulara dane
+ * decode nie sprawdza czy token jest valid ale go dekoduje
+ * jezli nie mamy verify wyzej to nie uzywaj decode
   * */
 router.post('/', function(req,res, next){
-    var message = new Message({
-        content: req.body.content
-    });
-    message.save(function(err, result){
+
+    var decoded = jwt.decode(req.query.token);
+    User.findById(decoded.user._id, function(err, user){
         if(err){
-            // wysylanie bledu do frontendu
-            //tu dajemy returna zeby w razie bledu dalszy kod nie byl wykonywany
             return res.status(500).json({
-                title: 'An error occurred',
-                error: err
-            })
+                title:'An error occurred',
+                err: err
+            });
         }
-        // 201 to kod resource created
-        res.status(201).json({
-            message: 'Saved message',
-            obj:result
-        })
+        //jezeli uzytkownik jest zdekodowany i znaleziony to zapisz
+        //widomosc uzytkownika
+
+        var message = new Message({
+            content: req.body.content,
+            user: user._id
+        });
+        //tutaj jest zapisywana widomosc do message collection i
+        //oprocz tego zapisujemy ja do uzytkownika
+
+        message.save(function(err, result){
+            if(err){
+                // wysylanie bledu do frontendu
+                //tu dajemy returna zeby w razie bledu dalszy kod nie byl wykonywany
+                return res.status(500).json({
+                    title: 'An error occurred',
+                    error: err
+                })
+            }
+            //user.messages.push(result);
+            user.messages.push(result)
+            user.save();
+            // 201 to kod resource created
+            res.status(201).json({
+                message: 'Saved message',
+                obj:result
+            })
+        });
+
     });
+
+
 });
 
 //Patch sluzy do update'u informacji w bazie. Mozna by dac post ale patch sluzy do updatowania
