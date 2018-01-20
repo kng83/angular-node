@@ -32,7 +32,7 @@ export class MessageInputComponent implements OnInit{
             // Observable zawsze ma 3 callbacki data ,error i end gdy jest complited
             const message = new Message(form.value.content, 'Max');
             this.messageService.addMessage(message).subscribe(
-                data => console.log(data),
+                data => console.log(data,'to jest addMessage'),
                 error=> console.log(error),
 
             );

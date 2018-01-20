@@ -23,6 +23,7 @@ export class MessageService {
         //const token - bierze token z local storage i robi sciezke ?token=asldad...
         //token dodajemy do naszego sending request i mamy go w query params
         //jak nie mamy token to wysylamy bez
+        //tutaj mamy akurat kompletny objekt user wiec dostep mamy prostszy niz w get
 
         const body = JSON.stringify(message);
         const headers = new Headers({'Content-Type':'application/json'});
@@ -34,7 +35,12 @@ export class MessageService {
            .map((response:Response)=>{
                 const result = response.json();
                 //Tu zwracamy nowa message na backendzie mamy obj
-                const message = new Message(result.obj.content, 'Dummy' ,result.obj._id,null);
+                const message = new Message(
+                    result.obj.content,
+                    result.obj.user.firstName,
+                    result.obj._id,
+                    result.obj.user._id);
+
                 this.messages. push(message);
                 return message;
            })
@@ -49,13 +55,19 @@ export class MessageService {
     getMessages() {
         // Poniewaz odpowiedz zawiera np _v z bazy danych trzeba ja przerobic
         // Tutaj rowniez jes pobierany _id z bazy danych
+        // Poniewaz uzylismy metody populate w mongoose to mamy dostep do obiektu user
+        //i mozemy pobrac jego firstName i zamiast null dajemy message.user._id
+
         return this.http.get('http://localhost:3000/message')
             .map((response: Response) =>{
                 const messages = response.json().obj;
                 let transformedMessages: Message[] =[];
                 for(let message of messages){
-                    transformedMessages.push(
-                        new Message(message.content, 'Dummy', message._id, null
+                    transformedMessages.push(new Message(
+                        message.content,
+                        message.user.firstName,
+                        message._id,
+                        message.user._id
                         ));
                 }
                 //tak zeby tu byl porzadek

@@ -34,4 +34,8 @@ export class MessageComponent {
         this.messageService.deleteMessage(this.message)
             .subscribe(result => console.log(result));
     }
+    //metoda sprawdzajaca czy dana karta nalezy do uzytkownika
+    belongsToUser(){
+        return localStorage.getItem('userId') == this.message.userId;
+    }
 }

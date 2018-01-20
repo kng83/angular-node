@@ -10,10 +10,13 @@ var User = require('../models/user');
 
 /*Tutaj wstawiamy get route do pobierania dancych z bazy danych
 * poniewaz mamy zimportowany nasz obiekt z mongoose mozemy dac tylko Message.find()
-*
+*Dodajemy tutaj exec bo bedziemy uzywac populate ktory umozliwia nam dostanie sie do
+* uzytkownika bo mamy referencje w message do user w mongo(patrz model)
+* pytanie czy user z malej litery
 * */
 router.get('/', function(req,res,next){
     Message.find()
+        .populate('user', 'firstName') // po dodaniu tego kazdy message bedzie mial user objekt lub tylko firstName?
         .exec(function(err, messages){
             if(err){
                 return res.status(500).json({
@@ -71,7 +74,7 @@ router.post('/', function(req,res, next){
 
         var message = new Message({
             content: req.body.content,
-            user: user._id
+            user: user
         });
         //tutaj jest zapisywana widomosc do message collection i
         //oprocz tego zapisujemy ja do uzytkownika
@@ -89,7 +92,7 @@ router.post('/', function(req,res, next){
             user.messages.push(result)
             user.save();
             // 201 to kod resource created
-            res.status(201).json({
+            res.status(200).json({
                 message: 'Saved message',
                 obj:result
             })
@@ -104,8 +107,10 @@ router.post('/', function(req,res, next){
 //w request.params bedzie sie znajdowalo id naszego rekordu ktory chcemy zmienic a w request.body.content
 //beda znajdowaly sie dane ktore bedziemy updatowac
 //po zatym stworzylismy nowy error ktory ma pasowac do naszego ogolnego schematu errorow
+//aby wyswietlic widomosci uzytkownika musimy sprawdzic ktory to uzytkownik bierzemy decoded token
 
 router.patch('/:id',function(req,res,next){
+    var decoded = jwt.decode(req.query.token);
     Message.findById(req.params.id, function(err,message){
         if(err){
             return res.status(500).json({
@@ -119,13 +124,20 @@ router.patch('/:id',function(req,res,next){
                 err: {message: 'Message not found'}
             })
         }
+        //aby zapobiec updatowaniu widomosci przez nie tego uzytkownika dodajemy
+        if(message.user != decoded.user._id){
+                return res.status(401).json({
+                    title: 'Not Authenticated',
+                    error: {message:'User do not mach'}
+                });
+        }
         message.content = req.body.content;
         message.save(function(err ,result){
             if(err){
                 return res.status(500).json({
                     title:'An error occurred',
                     error:err
-                })
+                });
             }
             res.status(200).json({
                 message: 'Updated message',
@@ -136,6 +148,7 @@ router.patch('/:id',function(req,res,next){
 });
 
 router.delete('/:id', function(req,res,next){
+    var decoded = jwt.decode(req.query.token);
     Message.findById(req.params.id, function(err,message){
         if(err){
             return res.status(500).json({
@@ -148,6 +161,14 @@ router.delete('/:id', function(req,res,next){
                 title: 'No Message Found!',
                 err: {message: 'Message not found'}
             })
+        }
+        //aby zapobiec usunieciu wiadomosci przez nie tego uzytkownika dodajemy
+        //tu nie mamy obiektu error wiec piszemy wlasna wiadomosc
+        if(message.user != decoded.user._id){
+                return res.status(401).json({
+                    title: 'Not Authenticated',
+                    error: {message:'User do not mach'}
+                });
         }
         message.content = req.body.content;
         message.remove(function(err ,result){
