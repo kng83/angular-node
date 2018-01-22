@@ -7,3 +7,4 @@ usePushEach
 //Do servisu potrzebujemy jeszcze mlab.com
 //tam musimy dodac uzytkownika i skopiowac dane od polaczenia z mongoDB
 // git heroku git:remote -a angular-node-dev
+// https://angular-node-dev.herokuapp.com/
