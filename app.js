@@ -5,6 +5,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
+var pass = require('./Auth/auth');
 
 var appRoutes = require('./routes/app');
 var messageRoutes = require('./routes/messages');
@@ -12,7 +13,7 @@ var userRoutes = require('./routes/user');
 
 mongoose.Promise = global.Promise;
 var app = express();
-mongoose.connect('mongodb://localhost:27017/node-angular', { useMongoClient: true });
+mongoose.connect('mongodb://test-user:test_pw@ds211588.mlab.com:11588/ang-node', { useMongoClient: true });
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
