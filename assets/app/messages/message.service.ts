@@ -3,6 +3,7 @@ import {Http,Response,Headers} from "@angular/http";
 import {EventEmitter, Injectable} from "@angular/core";
 import 'rxjs/Rx';
 import {Observable} from "rxjs/Observable";
+import {ErrorService} from '../errors/error.service';
 
 
 @Injectable()
@@ -10,7 +11,7 @@ export class MessageService {
     private messages: Message[] = [];
     messageIsEdit = new EventEmitter<Message>(); //emituje objekt message
 
-    constructor(private http: Http){
+    constructor(private http: Http,private errorService: ErrorService){
 
     }
     addMessage(message: Message) {
@@ -45,6 +46,8 @@ export class MessageService {
                 return message;
            })
            .catch((error:Response)=>{
+                // tutaj dodajemy przypisanie errora z servera do clienta
+                this.errorService.handleError(error.json());
                // tutaj daje sie observable bo rxjs nie nadaje automatycznie
                // errorowi statusu observable i dlatego go tworzymy
                return Observable.throw(error.json());
@@ -74,7 +77,10 @@ export class MessageService {
                 this.messages = transformedMessages;
                 return transformedMessages;
             })
-            .catch((error: Response) => Observable.throw(error.json()));
+            .catch((error: Response) => {
+                this.errorService.handleError(error.json());
+                return Observable.throw(error.json());
+            });
     }
 
     editMessage(message: Message){
@@ -97,7 +103,9 @@ export class MessageService {
             .catch((error:Response)=>{
                 // tutaj daje sie observable bo rxjs nie nadaje automatycznie
                 // errorowi statusu observable i dlatego go tworzymy
+                this.errorService.handleError(error.json());
                 return Observable.throw(error.json());
+
             })
 
     }
@@ -112,9 +120,9 @@ export class MessageService {
                 return response.json();
             })
             .catch((error:Response)=>{
-                // tutaj daje sie observable bo rxjs nie nadaje automatycznie
-                // errorowi statusu observable i dlatego go tworzymy
+                this.errorService.handleError(error.json());
                 return Observable.throw(error.json());
+
             })
 
     }
