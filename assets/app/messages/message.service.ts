@@ -4,6 +4,7 @@ import {EventEmitter, Injectable} from "@angular/core";
 import 'rxjs/Rx';
 import {Observable} from "rxjs/Observable";
 import {ErrorService} from '../errors/error.service';
+import {serverUrl} from '../common/environment';
 
 
 @Injectable()
@@ -32,7 +33,7 @@ export class MessageService {
             ? '?token=' + localStorage.getItem('token')
             : '';
         return this.http
-           .post('https://angular-node-dev.herokuapp.com/message' + token ,body,{headers: headers})
+           .post(serverUrl+'/message' + token ,body,{headers: headers})
            .map((response:Response)=>{
                 const result = response.json();
                 //Tu zwracamy nowa message na backendzie mamy obj
@@ -61,7 +62,7 @@ export class MessageService {
         // Poniewaz uzylismy metody populate w mongoose to mamy dostep do obiektu user
         //i mozemy pobrac jego firstName i zamiast null dajemy message.user._id
 
-        return this.http.get('https://angular-node-dev.herokuapp.com/message')
+        return this.http.get(serverUrl+'/message')
             .map((response: Response) =>{
                 const messages = response.json().obj;
                 let transformedMessages: Message[] =[];
@@ -96,7 +97,7 @@ export class MessageService {
             ? '?token=' + localStorage.getItem('token')
             : '';
         return this.http
-            .patch('https://angular-node-dev.herokuapp.com/message/' + message.messageId + token, body,{headers: headers})
+            .patch(serverUrl+'/message/' + message.messageId + token, body,{headers: headers})
             .map((response:Response)=>{
                 return response.json();
             })
@@ -115,7 +116,7 @@ export class MessageService {
         const token = localStorage.getItem('token')
             ? '?token=' + localStorage.getItem('token')
             : '';
-        return this.http.delete('https://angular-node-dev.herokuapp.com/message/' + message.messageId + token)
+        return this.http.delete(serverUrl+'/message/' + message.messageId + token)
             .map((response:Response)=>{
                 return response.json();
             })

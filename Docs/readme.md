@@ -8,3 +8,4 @@ usePushEach
 //tam musimy dodac uzytkownika i skopiowac dane od polaczenia z mongoDB
 // git heroku git:remote -a angular-node-dev
 // https://angular-node-dev.herokuapp.com/
+//w aws najpierw szuka app.js. Dopiero na 3 miescu szuka npm start. Dlatego zmieniamy nazwe pliku na application.js

@@ -6,6 +6,7 @@ import {Headers, Http, Response} from '@angular/http';
 import 'rxjs/Rx';
 import {Observable} from 'rxjs/Observable';
 import {ErrorService} from '../errors/error.service';
+import {serverUrl} from '../common/environment';
 
 @Injectable()
 export class AuthService{
@@ -16,7 +17,7 @@ export class AuthService{
     signup(user:User){
         const body = JSON.stringify(user);
         const headers = new Headers({'Content-Type': 'application/json'});
-        return this.http.post('https://angular-node-dev.herokuapp.com/user/',body, {headers:headers})
+        return this.http.post(serverUrl+'/user/',body, {headers:headers})
             .map((response: Response)=> response.json())
             .catch((error: Response) => {
                     this.errorService.handleError(error.json());
@@ -28,7 +29,7 @@ export class AuthService{
     singin(user: User){
         const body = JSON.stringify(user);
         const headers = new Headers({'Content-Type': 'application/json'});
-        return this.http.post('https://angular-node-dev.herokuapp.com/user/signin',body, {headers:headers})
+        return this.http.post(serverUrl+'/user/signin',body, {headers:headers})
             .map((response: Response)=> response.json())
             .catch((error: Response) =>{
                 this.errorService.handleError(error.json());
